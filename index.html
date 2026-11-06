@@ -1,0 +1,729 @@
+
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>大萍水生植物 AR 自然實驗室</title>
+
+<!-- A-Frame -->
+<script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+<!-- AR.js Marker Tracking -->
+<script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Noto Sans TC", sans-serif;
+  background: #f2f6f0;
+  color: #26382c;
+}
+
+header {
+  background: #315c46;
+  color: white;
+  padding: 22px 16px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0 0 8px;
+  font-size: 24px;
+}
+
+header p {
+  margin: 0;
+  font-size: 14px;
+}
+
+main {
+  width: min(960px, 94%);
+  margin: 20px auto;
+}
+
+.card {
+  background: white;
+  padding: 20px;
+  margin-bottom: 18px;
+  border-radius: 14px;
+  box-shadow: 0 3px 12px rgba(0,0,0,0.06);
+}
+
+h2 {
+  font-size: 19px;
+  margin-top: 0;
+  color: #315c46;
+}
+
+h3 {
+  font-size: 16px;
+}
+
+p {
+  line-height: 1.7;
+}
+
+input, textarea, select {
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0 14px;
+  border: 1px solid #ccd8ce;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+button {
+  border: none;
+  border-radius: 9px;
+  padding: 12px 16px;
+  margin: 5px 3px;
+  background: #477b58;
+  color: white;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+button:active {
+  opacity: 0.8;
+}
+
+button.secondary {
+  background: #e5eee6;
+  color: #315c46;
+}
+
+button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+.ar-stage {
+  height: 440px;
+  background: #202820;
+  overflow: hidden;
+  border-radius: 12px;
+  position: relative;
+}
+
+a-scene {
+  width: 100%;
+  height: 100%;
+}
+
+.status {
+  background: #edf4eb;
+  padding: 12px;
+  border-radius: 8px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.task {
+  border-left: 4px solid #75a879;
+  background: #f4f8f2;
+  padding: 12px;
+  margin: 12px 0;
+  border-radius: 6px;
+}
+
+.slider-value {
+  font-size: 23px;
+  font-weight: bold;
+  color: #477b58;
+}
+
+input[type="range"] {
+  padding: 0;
+}
+
+label {
+  font-weight: bold;
+}
+
+.option {
+  display: block;
+  margin: 12px 0;
+  font-weight: normal;
+}
+
+.option input {
+  width: auto;
+  margin-right: 8px;
+}
+
+.submit-button {
+  width: 100%;
+  background: #315c46;
+  font-size: 17px;
+  padding: 16px;
+}
+
+footer {
+  text-align: center;
+  padding: 25px;
+  color: #66756a;
+  font-size: 13px;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>🌿 大萍水生植物 AR 自然實驗室</h1>
+  <p>調整水位，觀察大萍如何生活在水中</p>
+</header>
+
+<main>
+
+<!-- 學生資料 -->
+<section class="card">
+  <h2>一、學生資料</h2>
+
+  <label>學生姓名</label>
+  <input id="studentName" placeholder="請輸入姓名" maxlength="50">
+
+  <label>班級</label>
+  <input id="className" placeholder="例如：五年甲班" maxlength="50">
+</section>
+
+
+<!-- 任務說明 -->
+<section class="card">
+  <h2>二、實驗任務</h2>
+
+  <p>
+    大萍是一種生活在水域中的植物。
+    它的葉片、莖與根分別位於什麼位置？
+    當水位改變時，又會出現什麼情形呢？
+  </p>
+
+  <div class="task">
+    <strong>你的任務：</strong>
+    <ol>
+      <li>掃描 AR 圖卡，觀察大萍的立體模型。</li>
+      <li>調整水位，分別觀察低水位與高水位。</li>
+      <li>仔細觀察大萍的莖、葉及根的位置。</li>
+      <li>比較不同水位下的植物狀態。</li>
+      <li>判斷大萍屬於哪一種水生植物生長方式。</li>
+    </ol>
+  </div>
+</section>
+
+
+<!-- AR觀察 -->
+<section class="card">
+  <h2>三、AR 立體觀察區</h2>
+
+  <p>
+    請允許瀏覽器使用相機，將鏡頭對準
+    <strong>Hiro AR 圖卡</strong>。
+    當圖卡被辨識時，就會顯示大萍 3D 模型。
+  </p>
+
+  <div class="ar-stage">
+
+    <a-scene
+      embedded
+      vr-mode-ui="enabled: false"
+      renderer="logarithmicDepthBuffer: true"
+      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+    >
+
+      <a-marker
+        id="hiroMarker"
+        preset="hiro"
+        emitevents="true"
+      >
+
+        <a-entity
+          id="plantModel"
+          position="0 0.38 0"
+          scale="0.15 0.15 0.15"
+          gltf-model="./models/plant.glb"
+        >
+        </a-entity>
+
+      </a-marker>
+
+      <a-entity camera></a-entity>
+
+    </a-scene>
+
+  </div>
+
+  <div class="status" id="arStatus">
+    等待 AR 圖卡辨識及模型載入……
+  </div>
+
+  <p>
+    <strong>觀察提示：</strong>
+    可以稍微移動平板或手機，從不同方向觀察葉片排列、
+    根系下垂及植株與水面的相對位置。
+  </p>
+</section>
+
+
+<!-- 水位調整 -->
+<section class="card">
+
+  <h2>四、水位調整實驗</h2>
+
+  <p>
+    拖曳下方滑桿，改變水箱中的水位。
+    觀察大萍是否會隨著水面位置改變。
+  </p>
+
+  <div class="slider-value">
+    目前水位：<span id="waterValue">0.2</span>
+  </div>
+
+  <input
+    id="waterSlider"
+    type="range"
+    min="-1.4"
+    max="1.6"
+    step="0.1"
+    value="0.2"
+  >
+
+  <div>
+    <button onclick="setPreset(-1.2)">
+      設定低水位
+    </button>
+
+    <button onclick="setPreset(1.2)">
+      設定高水位
+    </button>
+
+    <button class="secondary" onclick="setPreset(0.2)">
+      回到初始水位
+    </button>
+  </div>
+
+  <div class="status" id="waterStatus">
+    請調整水位，並觀察大萍的莖與葉。
+  </div>
+
+</section>
+
+
+<!-- 低水位觀察 -->
+<section class="card">
+
+  <h2>五、低水位觀察</h2>
+
+  <div class="task">
+    <strong>操作步驟：</strong>
+    <ol>
+      <li>按下「設定低水位」。</li>
+      <li>觀察大萍的葉片與莖的位置。</li>
+      <li>觀察根系與水面的相對位置。</li>
+      <li>將觀察結果記錄下來。</li>
+    </ol>
+  </div>
+
+  <label>低水位時，大萍的莖與葉有什麼情形？</label>
+
+  <textarea
+    id="lowObservation"
+    placeholder="例如：葉片位於水面附近，根系向水中垂下……"
+  ></textarea>
+
+</section>
+
+
+<!-- 高水位觀察 -->
+<section class="card">
+
+  <h2>六、高水位觀察</h2>
+
+  <div class="task">
+    <strong>操作步驟：</strong>
+    <ol>
+      <li>按下「設定高水位」。</li>
+      <li>觀察葉片與莖的位置是否改變。</li>
+      <li>比較根系與水面的相對位置。</li>
+      <li>將觀察結果記錄下來。</li>
+    </ol>
+  </div>
+
+  <label>高水位時，大萍的莖與葉有什麼情形？</label>
+
+  <textarea
+    id="highObservation"
+    placeholder="請記錄高水位時看到的現象。"
+  ></textarea>
+
+</section>
+
+
+<!-- 比較與分析 -->
+<section class="card">
+
+  <h2>七、比較與發現</h2>
+
+  <label>比較低水位與高水位，你發現了什麼？</label>
+
+  <textarea
+    id="comparison"
+    placeholder="請比較水位改變後，葉片、莖及根系的位置變化。"
+  ></textarea>
+
+</section>
+
+
+<!-- 分類判斷 -->
+<section class="card">
+
+  <h2>八、判斷大萍的生長方式</h2>
+
+  <p>
+    根據剛才的觀察，你認為大萍屬於哪一種水生植物？
+  </p>
+
+  <label class="option">
+    <input type="radio" name="plantType" value="挺水性">
+    挺水性
+  </label>
+
+  <label class="option">
+    <input type="radio" name="plantType" value="沉水性">
+    沉水性
+  </label>
+
+  <label class="option">
+    <input type="radio" name="plantType" value="浮葉性">
+    浮葉性
+  </label>
+
+  <label class="option">
+    <input type="radio" name="plantType" value="漂浮性">
+    漂浮性
+  </label>
+
+  <label>你為什麼這樣判斷？請寫出觀察到的證據。</label>
+
+  <textarea
+    id="reason"
+    placeholder="例如：我觀察到大萍的葉片……根系……因此我認為……"
+  ></textarea>
+
+</section>
+
+
+<!-- 其他觀察 -->
+<section class="card">
+
+  <h2>九、其他發現</h2>
+
+  <label>還有什麼特別的觀察或疑問嗎？</label>
+
+  <textarea
+    id="extraObservation"
+    placeholder="可以記錄你在不同角度觀察到的其他現象。"
+  ></textarea>
+
+</section>
+
+
+<!-- 提交 -->
+<section class="card">
+
+  <h2>十、提交學習單</h2>
+
+  <p>
+    請確認姓名、班級及觀察內容都已填寫，
+    再將學習單提交給老師。
+  </p>
+
+  <button
+    id="submitButton"
+    class="submit-button"
+    onclick="submitWorksheet()"
+  >
+    提交我的觀察紀錄
+  </button>
+
+  <div class="status" id="submitStatus">
+    尚未提交。
+  </div>
+
+</section>
+
+</main>
+
+<footer>
+  大萍水生植物 AR 自然實驗平台
+</footer>
+
+
+<script>
+
+// ========================================
+// 1. 系統設定
+// ========================================
+
+// 請替換成自己部署的 GAS 網頁應用程式網址
+const GAS_URL = "請貼上你的GAS網頁應用程式URL";
+
+// 水位設定
+const WATER_MIN = -2.5;
+
+// 目前 GLB 模型的水位範圍
+const LEVEL_MIN = -1.4;
+const LEVEL_MAX = 1.6;
+
+
+// ========================================
+// 2. AR 模型載入
+// ========================================
+
+const modelEl = document.querySelector("#plantModel");
+const markerEl = document.querySelector("#hiroMarker");
+
+let waterNode = null;
+let surfaceNode = null;
+let plantNode = null;
+
+let modelReady = false;
+
+
+modelEl.addEventListener("model-loaded", function() {
+
+  const root = modelEl.getObject3D("mesh");
+
+  if (!root) {
+    document.getElementById("arStatus").textContent =
+      "模型載入失敗，請檢查 GLB 檔案。";
+    return;
+  }
+
+  // 依照 Blender 匯出的物件名稱尋找節點
+  root.traverse(function(node) {
+
+    const name = node.name || "";
+
+    if (name.includes("可調整水體")) {
+      waterNode = node;
+    }
+
+    if (name === "水面") {
+      surfaceNode = node;
+    }
+
+    if (name.includes("大萍_母株")) {
+      plantNode = node;
+    }
+
+  });
+
+  modelReady = true;
+
+  document.getElementById("arStatus").textContent =
+    "模型已載入！請將鏡頭對準 Hiro 圖卡。";
+
+  // 初始化水位
+  updateWater(0.2);
+
+});
+
+
+modelEl.addEventListener("model-error", function() {
+
+  document.getElementById("arStatus").textContent =
+    "模型載入失敗，請確認 plant.glb 路徑是否正確。";
+
+});
+
+
+markerEl.addEventListener("markerFound", function() {
+
+  document.getElementById("arStatus").textContent =
+    "已辨識圖卡！現在可以觀察大萍 3D 模型。";
+
+});
+
+
+markerEl.addEventListener("markerLost", function() {
+
+  document.getElementById("arStatus").textContent =
+    "目前沒有辨識到圖卡，請重新對準圖卡。";
+
+});
+
+
+// ========================================
+// 3. 水位控制
+// ========================================
+
+const slider = document.getElementById("waterSlider");
+
+slider.addEventListener("input", function() {
+
+  const level = Number(slider.value);
+
+  updateWater(level);
+
+});
+
+
+function updateWater(level) {
+
+  document.getElementById("waterValue").textContent =
+    level.toFixed(1);
+
+  if (!modelReady) return;
+
+  // Blender 的 Z 軸在 GLB 中轉為 Y 軸
+  // 因此這裡調整節點的 Y 座標
+
+  if (waterNode) {
+
+    // 水體高度
+    waterNode.scale.y = (level - WATER_MIN) / 2;
+
+    // 水體中心位置
+    waterNode.position.y = (level + WATER_MIN) / 2;
+
+  }
+
+  if (surfaceNode) {
+    surfaceNode.position.y = level;
+  }
+
+  if (plantNode) {
+    plantNode.position.y = level;
+  }
+
+  document.getElementById("waterStatus").textContent =
+    "目前水位：" + level.toFixed(1) +
+    "。請觀察葉片、莖與根系的位置。";
+
+}
+
+
+function setPreset(level) {
+
+  slider.value = level;
+
+  updateWater(level);
+
+}
+
+
+// ========================================
+// 4. 學習單提交
+// ========================================
+
+function submitWorksheet() {
+
+  const studentName =
+    document.getElementById("studentName").value.trim();
+
+  const className =
+    document.getElementById("className").value.trim();
+
+  const lowObservation =
+    document.getElementById("lowObservation").value.trim();
+
+  const highObservation =
+    document.getElementById("highObservation").value.trim();
+
+  const comparison =
+    document.getElementById("comparison").value.trim();
+
+  const reason =
+    document.getElementById("reason").value.trim();
+
+  const extraObservation =
+    document.getElementById("extraObservation").value.trim();
+
+  const selectedType =
+    document.querySelector('input[name="plantType"]:checked');
+
+  // 基本檢查
+  if (!studentName || !className) {
+    alert("請先填寫學生姓名及班級。");
+    return;
+  }
+
+  if (!lowObservation || !highObservation ||
+      !comparison || !reason || !selectedType) {
+
+    alert("請完成低水位、高水位、比較與分類判斷等必填項目。");
+    return;
+
+  }
+
+  if (GAS_URL.includes("請貼上")) {
+    alert("請先設定 GAS_URL。");
+    return;
+  }
+
+  const data = {
+    studentName: studentName,
+    className: className,
+    lowObservation: lowObservation,
+    highObservation: highObservation,
+    comparison: comparison,
+    plantType: selectedType.value,
+    reason: reason,
+    extraObservation: extraObservation
+  };
+
+  const button = document.getElementById("submitButton");
+  const status = document.getElementById("submitStatus");
+
+  button.disabled = true;
+  button.textContent = "正在提交……";
+
+  // 以表單格式傳送，避免 JSON 跨網域預檢請求
+  const body = new URLSearchParams(data);
+
+  fetch(GAS_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+    },
+    body: body.toString()
+  })
+  .then(function() {
+
+    status.textContent =
+      "已送出提交請求。請稍候，並由老師確認 Google Sheets 是否新增紀錄。";
+
+    button.textContent = "已送出";
+
+  })
+  .catch(function(error) {
+
+    console.error(error);
+
+    status.textContent =
+      "提交時發生錯誤，請檢查網路或 GAS 部署設定，再重新嘗試。";
+
+    button.disabled = false;
+    button.textContent = "重新提交";
+
+  });
+
+}
+
+</script>
+
+</body>
+</html>
